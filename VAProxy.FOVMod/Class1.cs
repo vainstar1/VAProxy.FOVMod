@@ -5,10 +5,10 @@ using System.Collections;
 
 namespace ChangeFOVMod
 {
-    [BepInPlugin("com.yourname.changefov", "Change FOV Mod", "1.0.0")]
+    [BepInPlugin("vainstar.FOVMod", "Change FOV Mod", "1.0.0")]
     public class ChangeFOVMod : BaseUnityPlugin
     {
-        private const string TargetSceneName = "DaDemo";
+        private const string TargetSceneName = "BirdCage";
 
         private const float DefaultFOV = 0f;
         private float currentFOV = DefaultFOV;
