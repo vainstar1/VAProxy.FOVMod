@@ -1,7 +1,6 @@
-﻿using BepInEx;
+using BepInEx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using System.Collections;
 
 namespace ChangeFOVMod
 {
@@ -9,16 +8,15 @@ namespace ChangeFOVMod
     public class ChangeFOVMod : BaseUnityPlugin
     {
         private const string TargetSceneName = "BirdCage";
-
         private const float DefaultFOV = 0f;
-        private float currentFOV = DefaultFOV;
-
         private const string FOVKey = "CustomFOV";
+
+        private float currentFOV = DefaultFOV;
+        private Invector.vCamera.vThirdPersonCamera cachedCamera;
 
         private void Awake()
         {
             SceneManager.sceneLoaded += OnSceneLoaded;
-
             currentFOV = PlayerPrefs.GetFloat(FOVKey, DefaultFOV);
         }
 
@@ -26,21 +24,11 @@ namespace ChangeFOVMod
         {
             if (scene.name == TargetSceneName)
             {
-                StartCoroutine(SetFOVCoroutine());
-            }
-        }
-
-        private IEnumerator SetFOVCoroutine()
-        {
-            while (true)
-            {
-                var camera = FindObjectOfType<Invector.vCamera.vThirdPersonCamera>();
-                if (camera != null)
+                cachedCamera = FindObjectOfType<Invector.vCamera.vThirdPersonCamera>();
+                if (cachedCamera != null)
                 {
-
-                    SetCustomFOV(camera, currentFOV);
+                    SetCustomFOV(currentFOV);
                 }
-                yield return new WaitForSeconds(0.5f);
             }
         }
 
@@ -48,40 +36,28 @@ namespace ChangeFOVMod
         {
             if (Input.GetKeyDown(KeyCode.I))
             {
-                IncreaseFOV();
+                AdjustFOV(5f);
             }
             else if (Input.GetKeyDown(KeyCode.O))
             {
-                DecreaseFOV();
+                AdjustFOV(-5f);
             }
         }
 
-        private void IncreaseFOV()
+        private void AdjustFOV(float delta)
         {
-            currentFOV += 5f;
-            ClampFOV();
-
+            currentFOV = Mathf.Clamp(currentFOV + delta, 0f, 100f);
             PlayerPrefs.SetFloat(FOVKey, currentFOV);
+            PlayerPrefs.Save();
+            SetCustomFOV(currentFOV);
         }
 
-        private void DecreaseFOV()
+        private void SetCustomFOV(float fov)
         {
-            currentFOV -= 5f;
-            ClampFOV();
-
-            PlayerPrefs.SetFloat(FOVKey, currentFOV);
-        }
-
-        private void ClampFOV()
-        {
-
-            currentFOV = Mathf.Clamp(currentFOV, 0f, 100f);
-        }
-
-        private void SetCustomFOV(Invector.vCamera.vThirdPersonCamera camera, float fov)
-        {
-
-            camera.healFOV = fov;
+            if (cachedCamera != null)
+            {
+                cachedCamera.healFOV = fov;
+            }
         }
     }
 }
